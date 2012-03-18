@@ -89,7 +89,7 @@ class LogicAndCodesSpec extends Specification with LogicAndCodesSolutions with D
   false true  false
   false false false
   """ >>
-  { table2((a: Boolean, b: Boolean) => a and (a or not(b))) ===
+  { table2((a: Boolean, b: Boolean) => and(a, or(a, not(b)))) ===
     """
     |A     B     result
     |true  true  true
