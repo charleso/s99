@@ -16,7 +16,6 @@ trait ArithmeticSolutions {
     def primeFactors: List[Int] = ???
     def primeFactorMultiplicity: List[(Int, Int)] = ???
     def primeFactorMultiplicityMap: Map[Int, Int] = ???
-    def listPrimesinRange(r: Range): List[Int] = ???
     def goldbach: (Int, Int) = ???
 
   }
