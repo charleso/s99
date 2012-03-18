@@ -151,4 +151,74 @@ trait MyListsSolutions extends ListsSolutions {
     all(packSpan(Nil, list).reverse, packLoop)
   }
 
+  override def encode[T](list: List[T]) = pack(list).map(l => (l.length, l.head))
+
+  override def encodeModified[T](list: List[T]) = encode(list).map {
+    case (1, h) => h
+    case t => t
+  }
+
+  override def decode[T](list: List[(Int, T)]) = list.flatMap {
+    case (i, e) => List.fill(i)(e)
+  }
+
+  override def encodeDirect[T](list: List[T]): List[(Int, T)] = {
+    list.foldRight(Nil: List[(Int, T)]) {
+      case (t, (a, b) :: xs) if t == b => (a + 1, t) :: xs
+      case (t, xs) => (1, t) :: xs
+    }
+  }
+
+  override def duplicate[T](list: List[T]): List[T] = {
+    def dupFlatMap = list.flatMap(x => List(x, x))
+    def dupFold = list.foldRight(Nil: List[T])((x, xs) => x :: x :: xs)
+    def dupManual = {
+      val l = collection.mutable.ListBuffer[T]()
+      for (x <- list) {
+        l += x
+        l += x
+      }
+      l.toList
+    }
+    all(dupFlatMap, dupManual, dupFold)
+  }
+
+  override def duplicateN[T](n: Int, list: List[T]): List[T] = {
+    def dupFlatMap = list.flatMap(List.fill(n)(_))
+    def dupFold = list.foldRight(Nil: List[T])((x, xs) => List.fill(n)(x) ::: xs)
+    def dupManual = {
+      val l = collection.mutable.ListBuffer[T]()
+      for (x <- list) {
+        for (i <- 0 until n) {
+          l += x
+        }
+      }
+      l.toList
+    }
+    all(dupFlatMap, dupManual, dupFold)
+  }
+
+  override def drop[T](n: Int, list: List[T]): List[T] = {
+    @tailrec
+    def dropRec(i: Int, list: List[T], newlist: List[T]): List[T] = if (list.isEmpty) {
+      newlist
+    } else if (i == n) {
+      dropRec(1, list.tail, newlist)
+    } else {
+      dropRec(i + 1, list.tail, list.head :: newlist)
+    }
+
+    def dropZip = list.zipWithIndex.filter(_._2 % n != n - 1).map(_._1)
+
+    def dropManual = {
+      val l = collection.mutable.ListBuffer[T]()
+      for ((x, i) <- list.zipWithIndex) {
+        if (i % n != n - 1) {
+          l += x
+        }
+      }
+      l.toList
+    }
+    all(dropRec(1, list, Nil).reverse, dropManual, dropZip)
+  }
 }
