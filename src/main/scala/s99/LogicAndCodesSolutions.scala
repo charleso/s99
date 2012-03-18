@@ -11,11 +11,11 @@ trait LogicAndCodesSolutions { outer =>
   def xor(a: Boolean,  b: =>Boolean): Boolean = ???
   def impl(a: Boolean,  b: =>Boolean): Boolean = ???
   def equ(a: Boolean,  b: =>Boolean): Boolean = ???
-  def not(a: Boolean) = ???
+  def not(a: Boolean):Boolean = ???
   
   def table2(f: (Boolean, Boolean) => Boolean): String = ???
 
   def gray(n: Int): List[String] = ???
-  def huffman(list: List[(String,  Int)]): List[(String, String)] = ???
+  def huffman(list: List[(String,  Int)]): List[(String, Int)] = ???
 
 }
