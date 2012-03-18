@@ -108,7 +108,10 @@ class ListsSpec extends Specification with ListsSolutions {
   In how many ways can a committee of 3 be chosen from a group of 12 people? We all know that there are
   C(12,3) = 220 possibilities (C(N,K) denotes the well-known binomial coefficient). For pure mathematicians, this
   result may be great But we want to really generate all the possibilities""" >>
-  { combinations(3, List('a, 'b, 'c, 'd, 'e, 'f)) must contain(List('a, 'b, 'c), List('a, 'b, 'd), List('a, 'b, 'e)) }
+  {
+    combinations(3, List('a, 'b, 'c, 'd, 'e, 'f)) must contain(List('a, 'b, 'c), List('a, 'b, 'd), List('a, 'b, 'e))
+    combinations(3, 1 to 12 toList).size === 220
+  }
 
   """ Group the elements of a set into disjoint subsets
    a) In how many ways can a group of 9 people work in 3 disjoint subgroups of 2, 3 and 4 persons?
