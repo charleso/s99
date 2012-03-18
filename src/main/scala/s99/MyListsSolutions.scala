@@ -1,6 +1,7 @@
 package s99
 
 import annotation.tailrec
+import util.Random
 
 trait MyListsSolutions extends ListsSolutions {
 
@@ -221,4 +222,105 @@ trait MyListsSolutions extends ListsSolutions {
     }
     all(dropRec(1, list, Nil).reverse, dropManual, dropZip)
   }
+
+  override def split[T](n: Int, list: List[T]): (List[T], List[T]) = {
+    def cheating = list.splitAt(n)
+    @tailrec
+    def splitRec(n: Int, a: List[T], b: List[T]): (List[T], List[T]) =
+      if (n <= 0) (a.reverse, b) else splitRec(n - 1, b.head :: a, b.tail)
+
+    def takeDrop = (list.zipWithIndex.takeWhile(_._2 < n).map(_._1), list.zipWithIndex.dropWhile(_._2 < n).map(_._1))
+    def fold = list.zipWithIndex.foldRight((Nil: List[T], Nil: List[T])) {
+      case ((t, i), (a, b)) => if (i < n) (t :: a, b) else (a, t :: b)
+    }
+
+    all(cheating, splitRec(n, Nil, list), takeDrop, fold)
+  }
+
+  override def slice[T](i: Int, j: Int, list: List[T]) = split(j - i, split(i, list)._2)._1
+
+  override def rotate[T](n: Int, list: List[T]) =
+    if (n <= 0) rotate(n.abs, list.reverse).reverse
+    else split(n, list).swap match {
+      case (h, t) => h ::: t
+    }
+
+
+  override def removeAt[T](i: Int, list: List[T]): (List[T], T) =
+    split(i, list) match {
+      case (h, t) => (h ::: t.tail, t.head)
+    }
+
+  override def insertAt[T](a: T, i: Int, list: List[T]) =
+    split(i, list) match {
+      case (h, t) => h ::: a :: t
+    }
+
+  override def range[T](i: Int, j: Int): List[Int] = {
+    def rangeRec(i: Int, j: Int): List[Int] = if (i <= j) i :: rangeRec(i + 1, j) else Nil
+
+    @tailrec
+    def rangeRecTR(i: Int, j: Int, l: List[Int]): List[Int] = if (i <= j) rangeRecTR(i + 1, j, i :: l) else l.reverse
+
+    def cheating = i to j toList
+
+    def rangeFill = List.fill(j - i + 1)(i).zipWithIndex.map {
+      case (a, b) => a + b
+    }
+
+    def rangeLoop = {
+      val l = collection.mutable.ListBuffer[Int]()
+      for (x <- i to j) {
+        l += x
+      }
+      l.toList
+    }
+
+    all(rangeRec(i, j), rangeRecTR(i, j, Nil), cheating, rangeFill, rangeLoop)
+  }
+
+  override def randomSelect[T](n: Int, list: List[T]): List[T] = {
+    def shuffle = split(n, Random.shuffle(list))._1
+    def randomRec(n: Int, list: List[T]): List[T] = {
+      if (n <= 0) Nil
+      else {
+        val (t, a) = removeAt(Random.nextInt(list.length), list)
+        a :: randomRec(n - 1, t)
+      }
+    }
+    def loop = {
+      val l = collection.mutable.ListBuffer[T]()
+      var shrinking = list
+      for (i <- 0 until n) {
+        val (t, a) = removeAt(Random.nextInt(shrinking.length), shrinking)
+        shrinking = t
+        l += a
+      }
+      l.toList
+    }
+    assert(shuffle.length == loop.length)
+    assert(shuffle.length == randomRec(n, list).length)
+    shuffle
+  }
+
+  override def lotto[T](i: Int, j: Int): List[Int] = {
+    def map = List.fill(i)(j) map Random.nextInt
+    def loop = {
+      val l = collection.mutable.ListBuffer[Int]()
+      for (x <- 0 until i) {
+        l += Random.nextInt(j)
+      }
+      l.toList
+    }
+    randomSelect(i, range(1, j))
+  }
+
+  override def randomPermute[T](list: List[T]) = randomSelect(list.length, list)
+
+  override def group3[T](list: List[T]): List[List[List[T]]] = groups(List(2, 3, 4), list)
+
+  override def lsort[T](list: List[List[T]]) = list.sortBy(_.length)
+
+  override def lsortFreq[T](list: List[List[T]]): List[List[T]] =
+    list.groupBy(_.length).toList.sortBy(_._2.length).flatMap(_._2)
 }
