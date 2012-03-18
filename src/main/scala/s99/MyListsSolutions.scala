@@ -317,6 +317,15 @@ trait MyListsSolutions extends ListsSolutions {
 
   override def randomPermute[T](list: List[T]) = randomSelect(list.length, list)
 
+  private def tails[A](ls: List[A]) = ls.foldRight(Nil: List[List[A]]) {
+    case (h, t) => (h :: t.headOption.getOrElse(Nil)) :: t
+  }
+
+  override def combinations[A](n: Int, list: List[A]): List[List[A]] = {
+    if (n == 0) List(Nil)
+    else tails(list).flatMap(l => combinations(n - 1, l.tail) map (l.head :: _))
+  }
+
   override def group3[T](list: List[T]): List[List[List[T]]] = groups(List(2, 3, 4), list)
 
   override def lsort[T](list: List[List[T]]) = list.sortBy(_.length)
